@@ -1,0 +1,71 @@
+# Chatbox
+
+A simple web app that combines **tags** with an **auto-reply chat**. Type messages or tags, get instant replies, and your data is saved in the browser.
+
+![Chatbox](https://img.shields.io/badge/chatbox-tags%20%2B%20chat-667eea)
+
+## Features
+
+- **Tags** ? Add tags by typing and pressing **Enter**. Use commas for multiple tags (e.g. `react, vue, svelte`).
+- **Auto-reply** ? The chatbox replies to you: greetings, thanks, help, tag count, and more.
+- **Suggestions** ? As you type, previously used tags are suggested; click or add with Enter.
+- **Copy** ? Copy all current tags to the clipboard with one click.
+- **Clear** ? Remove all tags at once.
+- **Persistent data** ? Tags, tag history, and the conversation are stored in `localStorage` and restored when you return.
+
+## How to run
+
+1. Clone or download this repo.
+2. Open `index.html` in a browser (double-click or use a local server).
+
+```bash
+# Optional: serve with a local server (e.g. Python)
+cd "chat box"
+python -m http.server 8080
+# Then open http://localhost:8080
+```
+
+No build step or dependencies required.
+
+## Project structure
+
+```
+chat box/
+??? index.html   # Main page and markup
+??? style.css    # Layout, chat thread, tags, suggestions, responsive
+??? script.js    # Tags, cache, auto-reply, suggestions, copy/clear
+??? README.md    # This file
+```
+
+## Usage
+
+| Action | How |
+|--------|-----|
+| Add a tag | Type text and press **Enter** |
+| Add multiple tags | Type comma-separated (e.g. `a, b, c`) and press **Enter** |
+| Remove one tag | Click the � on the tag |
+| Copy all tags | Click the copy icon |
+| Clear all tags | Click the clear (�) icon |
+| Dismiss suggestions | Press **Escape** or click outside the input |
+
+## What the chatbox understands
+
+- **Greetings** ? hi, hello, hey, good morning, etc.
+- **Thanks** ? thanks, thank you, thx
+- **Goodbye** ? bye, goodbye, see you, good night
+- **Help** ? ?help?, ?what can you do?
+- **About** ? ?who are you?, ?how are you?
+- **Tags** ? ?how many tags?, ?show my tags?, ?list tags?
+- **Short replies** ? yes, no, nice, cool, great
+
+## Tech
+
+- **HTML5** ? Semantic markup, `aria-*` and `role` for accessibility.
+- **CSS** ? Custom properties, flexbox, scrollbars, `prefers-reduced-motion`, `focus-visible`.
+- **JavaScript** ? Vanilla JS, strict mode, IIFE; no frameworks.
+- **Icons** ? [Ionicons](https://ionic.io/ionicons) (unpkg).
+- **Font** ? [Poppins](https://fonts.google.com/specimen/Poppins) (Google Fonts).
+
+## License
+
+Use and modify as you like.
