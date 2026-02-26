@@ -1,15 +1,15 @@
 const express = require('express');
 const { getIndustries, createIndustry, updateIndustry, deleteIndustry } = require('../controllers/industries');
-const { adminAuth } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.route('/')
     .get(getIndustries)
-    .post(adminAuth, createIndustry);
+    .post(protect, authorize('admin'), createIndustry);
 
 router.route('/:id')
-    .put(adminAuth, updateIndustry)
-    .delete(adminAuth, deleteIndustry);
+    .put(protect, authorize('admin'), updateIndustry)
+    .delete(protect, authorize('admin'), deleteIndustry);
 
 module.exports = router;

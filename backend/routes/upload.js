@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { adminAuth } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -39,8 +39,7 @@ const upload = multer({
 
 // @desc    Upload file
 // @route   POST /api/upload
-// @access  Private (Admin)
-router.post('/', adminAuth, upload.single('image'), (req, res) => {
+router.post('/', protect, authorize('admin'), upload.single('image'), (req, res) => {
     if (req.file === undefined) {
         return res.status(400).json({ success: false, error: 'No file selected' });
     }

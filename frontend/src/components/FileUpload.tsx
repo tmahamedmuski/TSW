@@ -26,12 +26,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, value, onChange }) => {
         formData.append('image', file);
 
         try {
+            const token = localStorage.getItem('auth_token');
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/upload`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData,
-                // Authentication header if needed? 
-                // Our backend simple auth uses 'x-admin-key' if env ADMIN_KEY is set.
-                // We'll assume the simple auth for now.
             });
 
             if (!response.ok) {

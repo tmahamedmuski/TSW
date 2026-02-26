@@ -1,9 +1,22 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+const getHeaders = () => {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+};
+
 export const api = {
     get: async (endpoint: string) => {
         try {
-            const res = await fetch(`${API_URL}/${endpoint}`);
+            const res = await fetch(`${API_URL}/${endpoint}`, {
+                headers: getHeaders(),
+            });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const json = await res.json();
             return json.data;
@@ -16,7 +29,7 @@ export const api = {
         try {
             const res = await fetch(`${API_URL}/${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getHeaders(),
                 body: JSON.stringify(data),
             });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -31,7 +44,7 @@ export const api = {
         try {
             const res = await fetch(`${API_URL}/${endpoint}/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getHeaders(),
                 body: JSON.stringify(data),
             });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -46,6 +59,7 @@ export const api = {
         try {
             const res = await fetch(`${API_URL}/${endpoint}/${id}`, {
                 method: 'DELETE',
+                headers: getHeaders(),
             });
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             return res.json();

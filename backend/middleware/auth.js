@@ -1,19 +1,44 @@
-// Simple middleware to check for admin authorization
-// In a real app, this would verify a JWT or Supabase session
-const adminAuth = (req, res, next) => {
-    // For now, we trust the frontend's isAdmin check
-    // In a production environment, you should verify the Supabase JWT here
-    // For this implementation, we will allow all requests to proceed 
-    // but log the access. 
-    // If the user wants strict backend security, they can provide a secret key.
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-    // Check for a simple header if provided
-    const adminKey = req.headers['x-admin-key'];
-    if (process.env.ADMIN_KEY && adminKey !== process.env.ADMIN_KEY) {
-        return res.status(401).json({ success: false, error: 'Not authorized as admin' });
+// Protect routes
+exports.protect = async (req, res, next) => {
+    let token;
+
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+    ) {
+        // Set token from Bearer token in header
+        token = req.headers.authorization.split(' ')[1];
     }
 
-    next();
+    // Make sure token exists
+    if (!token) {
+        return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    }
+
+    try {
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        req.user = await User.findById(decoded.id);
+
+        next();
+    } catch (err) {
+        return res.status(401).json({ success: false, error: 'Not authorized to access this route' });
+    }
 };
 
-module.exports = { adminAuth };
+// Grant access to specific roles
+exports.authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({
+                success: false,
+                error: `User role ${req.user ? req.user.role : 'none'} is not authorized to access this route`
+            });
+        }
+        next();
+    };
+};

@@ -10,15 +10,15 @@ const {
 const router = express.Router();
 
 // Middleware for admin protection
-const { adminAuth } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
-    .get(getContacts)
-    .post(adminAuth, createContact);
+    .get(protect, authorize('admin'), getContacts)
+    .post(createContact);
 
 router.route('/:id')
     .get(getContact)
-    .put(adminAuth, updateContact)
-    .delete(adminAuth, deleteContact);
+    .put(protect, authorize('admin'), updateContact)
+    .delete(protect, authorize('admin'), deleteContact);
 
 module.exports = router;

@@ -27,6 +27,8 @@ app.use('/api/contacts', require('./routes/contacts'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/custom-tabs', require('./routes/customTabs'));
 app.use('/api/custom-items', require('./routes/customItems'));
+app.use('/api/auth', require('./routes/auth'));
+
 
 // Static folder for uploads
 const path = require('path');

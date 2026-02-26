@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { api } from "../utils/api";
-import { LogOut, Plus, Pencil, Trash2, Save, X } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, Save, X, ChevronDown, Layout } from "lucide-react";
 import * as Icons from "lucide-react";
 import FileUpload from "../components/FileUpload";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Tab = "services" | "employees" | "projects" | "industries" | "stats" | "contacts" | string;
 
@@ -56,23 +61,19 @@ const AdminDashboard = () => {
     fetchCustomTabs();
   };
 
-  useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
-      navigate("/admin/access");
-    }
-  }, [user, isAdmin, loading, navigate]);
-
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-background text-foreground">Loading...</div>;
-  if (!user || !isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto flex items-center justify-between py-4">
           <h1 className="font-display text-xl font-bold text-foreground">Saltware Admin</h1>
-          <button onClick={() => { signOut(); navigate("/"); }} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <LogOut size={16} /> Sign Out
-          </button>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-muted-foreground italic">Welcome, {user?.name || "Admin"}</span>
+            <button onClick={() => { signOut(); navigate("/"); }} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <LogOut size={16} /> Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -88,7 +89,7 @@ const AdminDashboard = () => {
               {t}
             </button>
           ))}
-          {customTabs.map((ct) => (
+          {customTabs.slice(0, 3).map((ct) => (
             <div key={ct.slug} className="group relative">
               <button
                 onClick={() => setTab(ct.slug)}
@@ -105,6 +106,32 @@ const AdminDashboard = () => {
               </button>
             </div>
           ))}
+
+          {customTabs.length > 3 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${customTabs.slice(3).some(ct => ct.slug === tab) ? "bg-accent text-accent-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"}`}>
+                More Sections <ChevronDown size={14} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 overflow-hidden rounded-xl border border-border/50 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
+                {customTabs.slice(3).map((ct) => (
+                  <DropdownMenuItem key={ct.slug} className="flex items-center justify-between gap-2 p-0">
+                    <button
+                      onClick={() => setTab(ct.slug)}
+                      className="flex-1 px-3 py-2 text-left text-sm font-medium hover:text-primary"
+                    >
+                      {ct.name}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteCustomTab(ct.id || ct._id || "", ct.name); }}
+                      className="mr-2 h-6 w-6 items-center justify-center rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-colors flex"
+                    >
+                      <X size={12} />
+                    </button>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <button
             onClick={() => setIsAddingTab(true)}
             className="rounded-lg border-2 border-dashed border-border px-3 py-2 text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"

@@ -26,7 +26,7 @@ const Footer = () => (
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          © 2026 Saltware (PVT) Ltd. All Rights Reserved.
+          © {new Date().getFullYear()} Saltware (PVT) Ltd. All Rights Reserved.
         </p>
       </div>
     </div>
