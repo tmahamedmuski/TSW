@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Service = require('./models/Service');
+const User = require('./models/User');
 
 const services = [
     {
@@ -32,15 +33,27 @@ const services = [
     }
 ];
 
+const adminUser = {
+    name: 'Admin User',
+    email: 'admin@saltware.com',
+    password: 'admin123',
+    role: 'admin'
+};
+
 const seedDB = async () => {
     try {
         // Connect to local MongoDB
-        await mongoose.connect('mongodb://127.0.0.1:27017/saltware');
+        await mongoose.connect(process.env.MONGO_URI || "mongodb+srv://sudhais:sudhais123@saltware.ppmmglb.mongodb.net/saltware");
         console.log('Connected to MongoDB for seeding...');
 
-        // Clear existing services
+        // Clear existing data
         await Service.deleteMany({});
-        console.log('Cleared existing services.');
+        await User.deleteMany({});
+        console.log('Cleared existing services and users.');
+
+        // Insert admin user
+        const user = await User.create(adminUser);
+        console.log('Created admin user:', user.email);
 
         // Insert new services
         await Service.insertMany(services);

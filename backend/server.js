@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
+app.get('/api/health',  (req, res) => res.json({ status: 'ok' }));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/employees', require('./routes/employees'));
 app.use('/api/projects', require('./routes/projects'));
@@ -34,8 +35,14 @@ app.use('/api/auth', require('./routes/auth'));
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
