@@ -1,8 +1,18 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Globe, Cpu } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { api } from "../utils/api";
 
 const HeroSection = () => {
+  const [content, setContent] = useState<any>(null);
+
+  useEffect(() => {
+    api.get("home-content").then(res => {
+      if (res) setContent(res.hero);
+    });
+  }, []);
+
   return (
     <section
       id="home"
@@ -28,7 +38,7 @@ const HeroSection = () => {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-accent"
           >
             <Shield size={14} />
-            Innovation with Integrity
+            {content?.subtitle || "Innovation with Integrity"}
           </motion.div>
 
           <motion.h1
@@ -37,8 +47,16 @@ const HeroSection = () => {
             transition={{ delay: 0.2 }}
             className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl"
           >
-            For People, Planet,{" "}
-            <span className="text-gradient">and Purpose</span>
+            {content?.title ? (
+              content.title.split(', ').map((part: string, i: number, arr: string[]) => (
+                <span key={i}>
+                  {part}{i < arr.length - 1 ? ', ' : ''}
+                  {i === arr.length - 2 && <span className="text-gradient"> {arr[arr.length - 1]}</span>}
+                </span>
+              ))
+            ) : (
+              <>For People, Planet, <span className="text-gradient">and Purpose</span></>
+            )}
           </motion.h1>
 
           <motion.p
@@ -47,8 +65,7 @@ const HeroSection = () => {
             transition={{ delay: 0.35 }}
             className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground"
           >
-            Saltware (PVT) Ltd delivers world-class software solutions and IT
-            services that empower businesses to thrive in the digital era.
+            {content?.description || "Saltware (PVT) Ltd delivers world-class software solutions and IT services that empower businesses to thrive in the digital era."}
           </motion.p>
 
           <motion.div
@@ -58,10 +75,10 @@ const HeroSection = () => {
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
             <a
-              href="#services"
+              href={content?.primaryButtonLink || "#services"}
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-shadow hover:shadow-glow"
             >
-              Explore Services <ArrowRight size={16} />
+              {content?.primaryButtonText || "Explore Services"} <ArrowRight size={16} />
             </a>
             <a
               href="#projects"

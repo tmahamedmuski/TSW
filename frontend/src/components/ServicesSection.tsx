@@ -100,6 +100,9 @@ const ServicesSection = () => {
                   <h3 className="mb-2 font-display text-base font-semibold text-foreground">
                     {s.title}
                   </h3>
+                  <p className="mb-4 text-xs text-muted-foreground line-clamp-2">
+                    {s.description}
+                  </p>
                   {/* Dynamic Fields - Polished UI */}
                   {s.data && Object.entries(s.data).length > 0 && (
                     <div className="mb-5 flex flex-wrap gap-2">

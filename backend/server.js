@@ -28,6 +28,8 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/custom-tabs', require('./routes/customTabs'));
 app.use('/api/custom-items', require('./routes/customItems'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/home-content', require('./routes/homeContent'));
 
 
 // Static folder for uploads

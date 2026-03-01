@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type Tab = "services" | "employees" | "projects" | "industries" | "stats" | "contacts" | string;
+type Tab = "home" | "services" | "employees" | "projects" | "industries" | "stats" | "contacts" | "messages" | string;
 
 interface ServiceRow { id?: string; _id?: string; icon: string; title: string; description: string; sort_order: number; status?: string; data?: Record<string, string>; }
 interface EmployeeRow { id?: string; _id?: string; name: string; position: string; photo_url: string | null; sort_order: number; status?: string; data?: Record<string, string>; }
@@ -26,7 +26,7 @@ interface CustomItemRow { id?: string; _id?: string; tabSlug: string; title: str
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("services");
+  const [tab, setTab] = useState<Tab>("home");
   const [serviceFilter, setServiceFilter] = useState<string | null>(null);
   const [customTabs, setCustomTabs] = useState<CustomTab[]>([]);
   const [isAddingTab, setIsAddingTab] = useState(false);
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto py-8">
         <div className="mb-8 flex flex-wrap gap-2">
-          {(["services", "employees", "projects", "industries", "stats", "contacts"] as Tab[]).map((t) => (
+          {(["home", "services", "employees", "projects", "industries", "stats", "contacts", "messages"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -262,6 +262,8 @@ const AdminDashboard = () => {
         {tab === "industries" && <IndustriesPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
         {tab === "stats" && <StatsPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
         {tab === "contacts" && <ContactsPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
+        {tab === "messages" && <MessagesPanel />}
+        {tab === "home" && <HomePanel />}
 
         {/* Render dynamic tab content */}
         {customTabs.map(ct => ct.slug === tab && (
@@ -1007,6 +1009,136 @@ const ContactsPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTabs
         />
       ))}
     </CrudPanel>
+  );
+};
+
+// ─── Messages ─────────────────────────────────────────
+const MessagesPanel = () => {
+  const [items, setItems] = useState<{ id: string; _id: string; name: string; email: string; subject: string; message: string; createdAt: string }[]>([]);
+
+  const fetch = async () => {
+    const data = await api.get("messages");
+    if (data) setItems(data);
+  };
+  useEffect(() => { fetch(); }, []);
+
+  const remove = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this message?")) return;
+    await api.delete("messages", id);
+    fetch();
+  };
+
+  return (
+    <CrudPanel title="Incoming Messages" onAdd={() => alert("Messages are created via the contact form.")}>
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground italic">
+          No messages yet.
+        </div>
+      ) : (
+        items.map((m) => (
+          <div key={m.id || m._id} className="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30">
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h3 className="font-display font-bold text-foreground">{m.subject}</h3>
+                <p className="text-xs text-muted-foreground">From: <span className="font-medium text-primary">{m.name}</span> ({m.email})</p>
+                <p className="text-[10px] text-muted-foreground/50 mt-1">{new Date(m.createdAt).toLocaleString()}</p>
+              </div>
+              <button
+                onClick={() => remove(m.id || m._id)}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+            <div className="rounded-lg bg-secondary/30 p-4 text-sm text-foreground whitespace-pre-wrap border border-border/50">
+              {m.message}
+            </div>
+          </div>
+        ))
+      )}
+    </CrudPanel>
+  );
+};
+
+// ─── Home Content ─────────────────────────────────────
+const HomePanel = () => {
+  const [content, setContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = async () => {
+    const res = await api.get("home-content");
+    if (res) setContent(res);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetch(); }, []);
+
+  const save = async () => {
+    await api.put("home-content", null, content);
+    alert("Home content updated successfully!");
+    fetch();
+  };
+
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+  if (!content) return <div className="p-8 text-center text-muted-foreground">Error loading content.</div>;
+
+  const updateHero = (field: string, value: string) => {
+    setContent({ ...content, hero: { ...content.hero, [field]: value } });
+  };
+
+  const updateAbout = (field: string, value: any) => {
+    setContent({ ...content, about: { ...content.about, [field]: value } });
+  };
+
+  return (
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-2 text-primary">
+          <Layout size={20} />
+          <h2 className="font-display text-xl font-bold">Hero Section</h2>
+        </div>
+        <div className="grid gap-6">
+          <Field label="Subtitle (Pill text)" value={content.hero.subtitle} onChange={(v) => updateHero('subtitle', v)} />
+          <Field label="Main Title" value={content.hero.title} onChange={(v) => updateHero('title', v)} />
+          <Field label="Description" value={content.hero.description} onChange={(v) => updateHero('description', v)} textarea />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Button Text" value={content.hero.primaryButtonText} onChange={(v) => updateHero('primaryButtonText', v)} />
+            <Field label="Button Link" value={content.hero.primaryButtonLink} onChange={(v) => updateHero('primaryButtonLink', v)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-2 text-primary">
+          <Layout size={20} />
+          <h2 className="font-display text-xl font-bold">About Section</h2>
+        </div>
+        <div className="grid gap-6">
+          <Field label="Subtitle" value={content.about.subtitle} onChange={(v) => updateAbout('subtitle', v)} />
+          <Field label="Main Title" value={content.about.title} onChange={(v) => updateAbout('title', v)} />
+          <Field label="Description Paragraph 1" value={content.about.description1} onChange={(v) => updateAbout('description1', v)} textarea />
+          <Field label="Description Paragraph 2" value={content.about.description2} onChange={(v) => updateAbout('description2', v)} textarea />
+          <div className="space-y-3">
+            <label className="text-xs font-medium text-muted-foreground">Key Competencies (Comma separated)</label>
+            <textarea
+              value={content.about.competencies.join(', ')}
+              onChange={(e) => updateAbout('competencies', e.target.value.split(',').map(s => s.trim()))}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="flex justify-end">
+        <button
+          onClick={save}
+          className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground transition-shadow hover:shadow-glow"
+        >
+          <Save size={18} /> Save All Changes
+        </button>
+      </div>
+    </div>
   );
 };
 

@@ -17,6 +17,12 @@ interface Contact {
 const ContactSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
   const [submitted, setSubmitted] = useState(false);
   const [contact, setContact] = useState<Contact | null>(null);
 
@@ -29,10 +35,29 @@ const ContactSection = () => {
     }).catch(err => console.error("Error fetching contact info:", err));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    try {
+      const response = await api.post("messages", formData);
+      if (response) {
+        setSubmitted(true);
+        // Clear form after submission
+        setFormData({ name: "", email: "", subject: "", message: "" });
+
+        // As requested by the user: refresh the page after 2 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message. Please try again later.");
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -119,6 +144,9 @@ const ContactSection = () => {
                 <input
                   required
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="Your name"
                   className="rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
@@ -128,6 +156,9 @@ const ContactSection = () => {
                 <input
                   required
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="you@company.com"
                   className="rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
@@ -138,6 +169,9 @@ const ContactSection = () => {
               <input
                 required
                 type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
                 placeholder="How can we help?"
                 className="rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -146,6 +180,9 @@ const ContactSection = () => {
               <label className="text-xs font-medium text-muted-foreground">Message</label>
               <textarea
                 required
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 rows={4}
                 placeholder="Tell us about your project..."
                 className="resize-none rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"

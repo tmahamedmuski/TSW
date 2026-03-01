@@ -40,9 +40,10 @@ export const api = {
             throw error;
         }
     },
-    put: async (endpoint: string, id: string, data: any) => {
+    put: async (endpoint: string, id: string | null, data: any) => {
         try {
-            const res = await fetch(`${API_URL}/${endpoint}/${id}`, {
+            const url = id ? `${API_URL}/${endpoint}/${id}` : `${API_URL}/${endpoint}`;
+            const res = await fetch(url, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify(data),
@@ -51,7 +52,7 @@ export const api = {
             const json = await res.json();
             return json.data;
         } catch (error) {
-            console.error(`API PUT error (${endpoint}/${id}):`, error);
+            console.error(`API PUT error (${endpoint}${id ? '/' + id : ''}):`, error);
             throw error;
         }
     },
