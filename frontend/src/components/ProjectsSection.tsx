@@ -64,7 +64,7 @@ const ProjectsSection = () => {
               <div className="aspect-video overflow-hidden bg-secondary">
                 {p.image_url ? (
                   <img
-                    src={p.image_url}
+                    src={api.getAssetUrl(p.image_url) || ""}
                     alt={p.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />

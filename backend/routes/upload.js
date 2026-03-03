@@ -44,9 +44,7 @@ router.post('/', protect, authorize('admin'), upload.single('image'), (req, res)
         return res.status(400).json({ success: false, error: 'No file selected' });
     }
 
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+    const fileUrl = `/uploads/${req.file.filename}`;
 
     res.status(200).json({
         success: true,

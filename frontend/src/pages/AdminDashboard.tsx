@@ -219,20 +219,37 @@ const AdminDashboard = () => {
                 <h4 className="mb-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Form Preview</h4>
                 <div className="space-y-4 rounded-lg border border-border bg-card/50 p-4 opacity-70">
                   <div className="flex items-center gap-2">
-                    {(() => { const Icon = (Icons as any)[newTabIcon] || Icons.Layout; return <Icon size={16} className="text-primary" />; })()}
-                    <div className="h-4 w-1/3 rounded bg-muted"></div>
+                    {(() => {
+                      const IconComp = (Icons as any)[newTabIcon];
+                      const Fallback = newTabIcon === 'other' ? Icons.HelpCircle : Icons.Layout;
+                      const ActualIcon = IconComp || Fallback;
+                      return <ActualIcon size={16} className="text-primary" />;
+                    })()}
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{newTabName || 'Section Name'}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5 col-span-2"><div className="h-2 w-10 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary"></div></div>
+                    <div className="space-y-1.5 col-span-2">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Item Title</div>
+                      <div className="h-8 rounded bg-secondary"></div>
+                    </div>
                     {newTabFields.filter(f => f.name.trim()).map((f, i) => (
                       <div key={i} className={`space-y-1.5 ${f.type === 'textarea' ? 'col-span-2' : ''}`}>
-                        <div className="h-2 w-16 rounded bg-muted/50"></div>
+                        <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">{f.name}</div>
                         <div className={`rounded bg-secondary ${f.type === 'textarea' ? 'h-16' : 'h-8'}`}></div>
                       </div>
                     ))}
-                    <div className="col-span-2 space-y-1.5"><div className="h-2 w-20 rounded bg-muted/50"></div><div className="aspect-video rounded bg-secondary"></div></div>
-                    <div className="space-y-1.5"><div className="h-2 w-14 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary/50"></div></div>
-                    <div className="space-y-1.5"><div className="h-2 w-14 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary/50"></div></div>
+                    <div className="col-span-2 space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Item Image</div>
+                      <div className="aspect-video rounded bg-secondary"></div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Sort Order</div>
+                      <div className="h-8 rounded bg-secondary/50"></div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Status</div>
+                      <div className="h-8 rounded bg-secondary/50"></div>
+                    </div>
                   </div>
                 </div>
                 <p className="mt-4 text-center text-[10px] text-muted-foreground">Each item in {newTabName || 'this section'} will look like this.</p>
@@ -283,7 +300,7 @@ const AdminDashboard = () => {
 
 const AVAILABLE_ICONS = [
   "Code2", "Cloud", "Settings", "Headphones", "BarChart3", "Database", "Smartphone", "ShieldCheck", "Globe", "Cpu", "Monitor", "Wifi", "Server", "Lock",
-  "Factory", "Landmark", "Heart", "HeartPulse", "ShoppingCart", "ShoppingBag", "Zap", "Plane", "Building2", "Droplets"
+  "Factory", "Landmark", "Heart", "HeartPulse", "ShoppingCart", "ShoppingBag", "Zap", "Plane", "Building2", "Droplets", "other"
 ];
 
 const AVAILABLE_SERVICES = [
@@ -1313,29 +1330,51 @@ const Field = ({ label, value, onChange, textarea, placeholder }: { label: strin
   </div>
 );
 
-const SelectField = ({ label, value, onChange, options, displayOptions, showIcons }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-xs font-medium text-muted-foreground">{label}</label>
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        {options.map((opt, i) => (
-          <option key={opt} value={opt}>{displayOptions ? displayOptions[i] : opt}</option>
-        ))}
-      </select>
-      {showIcons && value && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
-          {(() => {
-            const IconComponent = (Icons as any)[value];
-            return IconComponent ? <IconComponent size={18} /> : null;
-          })()}
+const SelectField = ({ label, value, onChange, options, displayOptions, showIcons }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean }) => {
+  const isCustom = showIcons && value && !options.filter(opt => opt !== 'other').includes(value);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium text-muted-foreground">{label}</label>
+      <div className="relative">
+        <select
+          value={isCustom ? "other" : value}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === 'other') {
+              onChange(""); // Clear to let user type
+            } else {
+              onChange(val);
+            }
+          }}
+          className="w-full appearance-none rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          {options.map((opt, i) => (
+            <option key={opt} value={opt}>{displayOptions ? displayOptions[i] : opt}</option>
+          ))}
+        </select>
+        {showIcons && value && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
+            {(() => {
+              const IconComponent = (Icons as any)[value];
+              return IconComponent ? <IconComponent size={18} /> : (isCustom ? <Icons.HelpCircle size={18} /> : null);
+            })()}
+          </div>
+        )}
+      </div>
+      {showIcons && (value === "other" || isCustom || (options.includes('other') && !options.includes(value) && value !== "")) && (
+        <div className="mt-1.5 flex flex-col gap-1">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Type Lucide Icon Name</label>
+          <input
+            value={value === "other" ? "" : value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="e.g. Anchor, Bell, Heart"
+            className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/30"
+          />
         </div>
       )}
     </div>
-  </div>
-);
+  );
+};
 
 export default AdminDashboard;

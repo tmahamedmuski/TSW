@@ -82,7 +82,7 @@ const DynamicSection = ({ slug, title, icon }: DynamicSectionProps) => {
                                 {it.image && (
                                     <div className="aspect-video overflow-hidden bg-secondary">
                                         <img
-                                            src={it.image}
+                                            src={api.getAssetUrl(it.image) || ""}
                                             alt={it.title}
                                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />

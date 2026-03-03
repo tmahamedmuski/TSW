@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { api } from '../utils/api';
 
 interface FileUploadProps {
     label: string;
@@ -68,7 +69,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, value, onChange }) => {
                 {value ? (
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-secondary">
                         <img
-                            src={value}
+                            src={api.getAssetUrl(value) || ""}
                             alt="Preview"
                             className="h-full w-full object-cover"
                         />
