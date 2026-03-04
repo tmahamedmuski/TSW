@@ -371,7 +371,13 @@ const ServicesPanel = ({ onViewProjects, allTabs, onTabsUpdate }: { onViewProjec
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <SelectField label="Icon" value={editing.icon} onChange={(v) => setEditing({ ...editing, icon: v })} options={AVAILABLE_ICONS} showIcons />
-          <Field label="Title" value={editing.title} onChange={(v) => setEditing({ ...editing, title: v })} />
+          <SelectField
+            label="Title"
+            value={editing.title}
+            onChange={(v) => setEditing({ ...editing, title: v })}
+            options={[...Array.from(new Set([...AVAILABLE_SERVICES, ...items.map(s => s.title).filter(t => t).map(t => t.trim())])), "other"]}
+            allowCustom
+          />
           <Field label="Description" value={editing.description} onChange={(v) => setEditing({ ...editing, description: v })} textarea />
 
           {/* Dynamic Fields */}
@@ -493,7 +499,13 @@ const EmployeesPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTab
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <Field label="Name" value={editing.name} onChange={(v) => setEditing({ ...editing, name: v })} />
-          <Field label="Position" value={editing.position} onChange={(v) => setEditing({ ...editing, position: v })} />
+          <SelectField
+            label="Position"
+            value={editing.position}
+            onChange={(v) => setEditing({ ...editing, position: v })}
+            options={[...Array.from(new Set(items.map(e => e.position).filter(p => p).map(p => p.trim()))), "other"]}
+            allowCustom
+          />
           <FileUpload label="Team Member Photo" value={editing.photo_url} onChange={(url) => setEditing({ ...editing, photo_url: url })} />
 
           {/* Dynamic Fields */}
@@ -746,7 +758,13 @@ const IndustriesPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTa
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <SelectField label="Icon" value={editing.icon} onChange={(v) => setEditing({ ...editing, icon: v })} options={AVAILABLE_ICONS} showIcons />
-          <Field label="Title" value={editing.title} onChange={(v) => setEditing({ ...editing, title: v })} />
+          <SelectField
+            label="Title"
+            value={editing.title}
+            onChange={(v) => setEditing({ ...editing, title: v })}
+            options={[...Array.from(new Set(items.map(i => i.title).filter(t => t).map(t => t.trim()))), "other"]}
+            allowCustom
+          />
 
           {/* Dynamic Fields */}
           {currentTabFields.map((f, i) => (
@@ -859,7 +877,13 @@ const StatsPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTabsUpd
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <Field label="Value" value={editing.value} onChange={(v) => setEditing({ ...editing, value: v })} />
-          <Field label="Label" value={editing.label} onChange={(v) => setEditing({ ...editing, label: v })} />
+          <SelectField
+            label="Label"
+            value={editing.label}
+            onChange={(v) => setEditing({ ...editing, label: v })}
+            options={[...Array.from(new Set(items.map(s => s.label).filter(l => l).map(l => l.trim()))), "other"]}
+            allowCustom
+          />
 
           {/* Dynamic Fields */}
           {currentTabFields.map((f, i) => (
@@ -1330,8 +1354,8 @@ const Field = ({ label, value, onChange, textarea, placeholder }: { label: strin
   </div>
 );
 
-const SelectField = ({ label, value, onChange, options, displayOptions, showIcons }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean }) => {
-  const isCustom = showIcons && value && !options.filter(opt => opt !== 'other').includes(value);
+const SelectField = ({ label, value, onChange, options, displayOptions, showIcons, allowCustom }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean; allowCustom?: boolean }) => {
+  const isCustom = (showIcons || allowCustom) && value && !options.filter(opt => opt !== 'other').includes(value);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -1347,7 +1371,7 @@ const SelectField = ({ label, value, onChange, options, displayOptions, showIcon
               onChange(val);
             }
           }}
-          className="w-full appearance-none rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className={`w-full appearance-none rounded-lg border border-border bg-secondary ${showIcons ? 'pl-10' : 'pl-4'} pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
         >
           {options.map((opt, i) => (
             <option key={opt} value={opt}>{displayOptions ? displayOptions[i] : opt}</option>
@@ -1362,13 +1386,13 @@ const SelectField = ({ label, value, onChange, options, displayOptions, showIcon
           </div>
         )}
       </div>
-      {showIcons && (value === "other" || isCustom || (options.includes('other') && !options.includes(value) && value !== "")) && (
+      {(showIcons || allowCustom) && (value === "other" || isCustom || (options.includes('other') && !options.filter(opt => opt !== 'other').includes(value))) && (
         <div className="mt-1.5 flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Type Lucide Icon Name</label>
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{allowCustom ? `Type Custom ${label}` : "Type Lucide Icon Name"}</label>
           <input
             value={value === "other" ? "" : value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="e.g. Anchor, Bell, Heart"
+            placeholder={allowCustom ? `e.g. My Custom ${label}` : "e.g. Anchor, Bell, Heart"}
             className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/30"
           />
         </div>

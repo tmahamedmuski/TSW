@@ -81,7 +81,8 @@ const ServicesSection = () => {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => {
-            const IconComp = iconMap[s.icon] || Icons.Code2;
+            const LucideIcon = (Icons as any)[s.icon];
+            const IconComp = LucideIcon || iconMap[s.icon] || Icons.Code2;
             const id = s.id || s._id;
             return (
               <motion.div

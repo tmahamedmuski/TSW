@@ -5,15 +5,8 @@ const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+// Set memory storage engine
+const storage = multer.memoryStorage();
 
 // Check file type
 function checkFileType(file, cb) {
@@ -37,18 +30,20 @@ const upload = multer({
     }
 });
 
-// @desc    Upload file
+// @desc    Upload file (Returns Base64 for MongoDB storage)
 // @route   POST /api/upload
 router.post('/', protect, authorize('admin'), upload.single('image'), (req, res) => {
     if (req.file === undefined) {
         return res.status(400).json({ success: false, error: 'No file selected' });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Convert to Base64 data URI
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataUri = `data:${req.file.mimetype};base64,${b64}`;
 
     res.status(200).json({
         success: true,
-        data: fileUrl
+        data: dataUri
     });
 });
 

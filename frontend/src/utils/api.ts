@@ -71,7 +71,7 @@ export const api = {
     },
     getAssetUrl: (path: string | null) => {
         if (!path) return null;
-        if (path.startsWith('http')) return path;
+        if (path.startsWith('http') || path.startsWith('data:')) return path;
         const baseUrl = API_URL.replace(/\/api$/, '');
         return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
     }

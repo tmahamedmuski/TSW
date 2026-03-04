@@ -1,8 +1,13 @@
 const Message = require('../models/Message');
 const { Resend } = require('resend');
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend safely
+let resend;
+if (process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+    console.warn('WARNING: RESEND_API_KEY is missing in .env. Email notifications will be disabled.');
+}
 
 // @desc    Get all messages
 // @route   GET /api/messages
@@ -30,32 +35,36 @@ exports.createMessage = async (req, res) => {
         console.log('Message saved to database:', newMessage.id);
 
         // 2. Send email notification using Resend
-        const receiverEmail = process.env.RECEIVER_EMAIL || 'info@saltware.lk';
+        if (resend) {
+            const receiverEmail = process.env.RECEIVER_EMAIL || 'info@saltware.lk';
 
-        const { data, error } = await resend.emails.send({
-            from: 'Saltware Contact <onboarding@resend.dev>', // Resend requires verified domain or onboarding address
-            to: [receiverEmail],
-            subject: `New Contact Form: ${subject}`,
-            reply_to: email,
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #0066cc;">New Message from Saltware Website</h2>
-                    <p><strong>Name:</strong> ${name}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Subject:</strong> ${subject}</p>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p><strong>Message content:</strong></p>
-                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #0066cc;">
-                        ${message.replace(/\n/g, '<br>')}
+            const { data, error } = await resend.emails.send({
+                from: 'Saltware Contact <onboarding@resend.dev>', // Resend requires verified domain or onboarding address
+                to: [receiverEmail],
+                subject: `New Contact Form: ${subject}`,
+                reply_to: email,
+                html: `
+                    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                        <h2 style="color: #0066cc;">New Message from Saltware Website</h2>
+                        <p><strong>Name:</strong> ${name}</p>
+                        <p><strong>Email:</strong> ${email}</p>
+                        <p><strong>Subject:</strong> ${subject}</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <p><strong>Message content:</strong></p>
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #0066cc;">
+                            ${message.replace(/\n/g, '<br>')}
+                        </div>
                     </div>
-                </div>
-            `,
-        });
+                `,
+            });
 
-        if (error) {
-            console.error('Resend error:', error);
+            if (error) {
+                console.error('Resend error:', error);
+            } else {
+                console.log('Email sent successfully via Resend:', data.id);
+            }
         } else {
-            console.log('Email sent successfully via Resend:', data.id);
+            console.log('Email notification skipped: RESEND_API_KEY not configured.');
         }
 
         res.status(201).json({ success: true, data: newMessage });
