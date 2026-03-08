@@ -12,7 +12,7 @@ connectDB();
 const app = express();
 
 // Enable CORS
-app.use(cors());
+app.use(cors('*'));
 
 // Body parser
 app.use(express.json({ limit: '50mb' }));
