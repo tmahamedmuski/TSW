@@ -81,7 +81,8 @@ const ServicesSection = () => {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => {
-            const IconComp = iconMap[s.icon] || Icons.Code2;
+            const LucideIcon = (Icons as any)[s.icon];
+            const IconComp = LucideIcon || iconMap[s.icon] || Icons.Code2;
             const id = s.id || s._id;
             return (
               <motion.div
@@ -100,6 +101,9 @@ const ServicesSection = () => {
                   <h3 className="mb-2 font-display text-base font-semibold text-foreground">
                     {s.title}
                   </h3>
+                  <p className="mb-4 text-xs text-muted-foreground line-clamp-2">
+                    {s.description}
+                  </p>
                   {/* Dynamic Fields - Polished UI */}
                   {s.data && Object.entries(s.data).length > 0 && (
                     <div className="mb-5 flex flex-wrap gap-2">

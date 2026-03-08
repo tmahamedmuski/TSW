@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type Tab = "services" | "employees" | "projects" | "industries" | "stats" | "contacts" | string;
+type Tab = "home" | "services" | "employees" | "projects" | "industries" | "stats" | "contacts" | "messages" | string;
 
 interface ServiceRow { id?: string; _id?: string; icon: string; title: string; description: string; sort_order: number; status?: string; data?: Record<string, string>; }
 interface EmployeeRow { id?: string; _id?: string; name: string; position: string; photo_url: string | null; sort_order: number; status?: string; data?: Record<string, string>; }
@@ -26,7 +26,7 @@ interface CustomItemRow { id?: string; _id?: string; tabSlug: string; title: str
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("services");
+  const [tab, setTab] = useState<Tab>("home");
   const [serviceFilter, setServiceFilter] = useState<string | null>(null);
   const [customTabs, setCustomTabs] = useState<CustomTab[]>([]);
   const [isAddingTab, setIsAddingTab] = useState(false);
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto py-8">
         <div className="mb-8 flex flex-wrap gap-2">
-          {(["services", "employees", "projects", "industries", "stats", "contacts"] as Tab[]).map((t) => (
+          {(["home", "services", "employees", "projects", "industries", "stats", "contacts", "messages"] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -219,20 +219,37 @@ const AdminDashboard = () => {
                 <h4 className="mb-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Form Preview</h4>
                 <div className="space-y-4 rounded-lg border border-border bg-card/50 p-4 opacity-70">
                   <div className="flex items-center gap-2">
-                    {(() => { const Icon = (Icons as any)[newTabIcon] || Icons.Layout; return <Icon size={16} className="text-primary" />; })()}
-                    <div className="h-4 w-1/3 rounded bg-muted"></div>
+                    {(() => {
+                      const IconComp = (Icons as any)[newTabIcon];
+                      const Fallback = newTabIcon === 'other' ? Icons.HelpCircle : Icons.Layout;
+                      const ActualIcon = IconComp || Fallback;
+                      return <ActualIcon size={16} className="text-primary" />;
+                    })()}
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{newTabName || 'Section Name'}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5 col-span-2"><div className="h-2 w-10 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary"></div></div>
+                    <div className="space-y-1.5 col-span-2">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Item Title</div>
+                      <div className="h-8 rounded bg-secondary"></div>
+                    </div>
                     {newTabFields.filter(f => f.name.trim()).map((f, i) => (
                       <div key={i} className={`space-y-1.5 ${f.type === 'textarea' ? 'col-span-2' : ''}`}>
-                        <div className="h-2 w-16 rounded bg-muted/50"></div>
+                        <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">{f.name}</div>
                         <div className={`rounded bg-secondary ${f.type === 'textarea' ? 'h-16' : 'h-8'}`}></div>
                       </div>
                     ))}
-                    <div className="col-span-2 space-y-1.5"><div className="h-2 w-20 rounded bg-muted/50"></div><div className="aspect-video rounded bg-secondary"></div></div>
-                    <div className="space-y-1.5"><div className="h-2 w-14 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary/50"></div></div>
-                    <div className="space-y-1.5"><div className="h-2 w-14 rounded bg-muted/50"></div><div className="h-8 rounded bg-secondary/50"></div></div>
+                    <div className="col-span-2 space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Item Image</div>
+                      <div className="aspect-video rounded bg-secondary"></div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Sort Order</div>
+                      <div className="h-8 rounded bg-secondary/50"></div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase">Status</div>
+                      <div className="h-8 rounded bg-secondary/50"></div>
+                    </div>
                   </div>
                 </div>
                 <p className="mt-4 text-center text-[10px] text-muted-foreground">Each item in {newTabName || 'this section'} will look like this.</p>
@@ -262,6 +279,8 @@ const AdminDashboard = () => {
         {tab === "industries" && <IndustriesPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
         {tab === "stats" && <StatsPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
         {tab === "contacts" && <ContactsPanel allTabs={customTabs} onTabsUpdate={fetchCustomTabs} />}
+        {tab === "messages" && <MessagesPanel />}
+        {tab === "home" && <HomePanel />}
 
         {/* Render dynamic tab content */}
         {customTabs.map(ct => ct.slug === tab && (
@@ -281,7 +300,7 @@ const AdminDashboard = () => {
 
 const AVAILABLE_ICONS = [
   "Code2", "Cloud", "Settings", "Headphones", "BarChart3", "Database", "Smartphone", "ShieldCheck", "Globe", "Cpu", "Monitor", "Wifi", "Server", "Lock",
-  "Factory", "Landmark", "Heart", "HeartPulse", "ShoppingCart", "ShoppingBag", "Zap", "Plane", "Building2", "Droplets"
+  "Factory", "Landmark", "Heart", "HeartPulse", "ShoppingCart", "ShoppingBag", "Zap", "Plane", "Building2", "Droplets", "other"
 ];
 
 const AVAILABLE_SERVICES = [
@@ -352,7 +371,13 @@ const ServicesPanel = ({ onViewProjects, allTabs, onTabsUpdate }: { onViewProjec
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <SelectField label="Icon" value={editing.icon} onChange={(v) => setEditing({ ...editing, icon: v })} options={AVAILABLE_ICONS} showIcons />
-          <Field label="Title" value={editing.title} onChange={(v) => setEditing({ ...editing, title: v })} />
+          <SelectField
+            label="Title"
+            value={editing.title}
+            onChange={(v) => setEditing({ ...editing, title: v })}
+            options={[...Array.from(new Set([...AVAILABLE_SERVICES, ...items.map(s => s.title).filter(t => t).map(t => t.trim())])), "other"]}
+            allowCustom
+          />
           <Field label="Description" value={editing.description} onChange={(v) => setEditing({ ...editing, description: v })} textarea />
 
           {/* Dynamic Fields */}
@@ -474,7 +499,13 @@ const EmployeesPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTab
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <Field label="Name" value={editing.name} onChange={(v) => setEditing({ ...editing, name: v })} />
-          <Field label="Position" value={editing.position} onChange={(v) => setEditing({ ...editing, position: v })} />
+          <SelectField
+            label="Position"
+            value={editing.position}
+            onChange={(v) => setEditing({ ...editing, position: v })}
+            options={[...Array.from(new Set(items.map(e => e.position).filter(p => p).map(p => p.trim()))), "other"]}
+            allowCustom
+          />
           <FileUpload label="Team Member Photo" value={editing.photo_url} onChange={(url) => setEditing({ ...editing, photo_url: url })} />
 
           {/* Dynamic Fields */}
@@ -727,7 +758,13 @@ const IndustriesPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTa
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <SelectField label="Icon" value={editing.icon} onChange={(v) => setEditing({ ...editing, icon: v })} options={AVAILABLE_ICONS} showIcons />
-          <Field label="Title" value={editing.title} onChange={(v) => setEditing({ ...editing, title: v })} />
+          <SelectField
+            label="Title"
+            value={editing.title}
+            onChange={(v) => setEditing({ ...editing, title: v })}
+            options={[...Array.from(new Set(items.map(i => i.title).filter(t => t).map(t => t.trim()))), "other"]}
+            allowCustom
+          />
 
           {/* Dynamic Fields */}
           {currentTabFields.map((f, i) => (
@@ -840,7 +877,13 @@ const StatsPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTabsUpd
       {editing && (
         <EditCard onSave={save} onCancel={() => { setEditing(null); setIsNew(false); }}>
           <Field label="Value" value={editing.value} onChange={(v) => setEditing({ ...editing, value: v })} />
-          <Field label="Label" value={editing.label} onChange={(v) => setEditing({ ...editing, label: v })} />
+          <SelectField
+            label="Label"
+            value={editing.label}
+            onChange={(v) => setEditing({ ...editing, label: v })}
+            options={[...Array.from(new Set(items.map(s => s.label).filter(l => l).map(l => l.trim()))), "other"]}
+            allowCustom
+          />
 
           {/* Dynamic Fields */}
           {currentTabFields.map((f, i) => (
@@ -1007,6 +1050,136 @@ const ContactsPanel = ({ allTabs, onTabsUpdate }: { allTabs: CustomTab[]; onTabs
         />
       ))}
     </CrudPanel>
+  );
+};
+
+// ─── Messages ─────────────────────────────────────────
+const MessagesPanel = () => {
+  const [items, setItems] = useState<{ id: string; _id: string; name: string; email: string; subject: string; message: string; createdAt: string }[]>([]);
+
+  const fetch = async () => {
+    const data = await api.get("messages");
+    if (data) setItems(data);
+  };
+  useEffect(() => { fetch(); }, []);
+
+  const remove = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this message?")) return;
+    await api.delete("messages", id);
+    fetch();
+  };
+
+  return (
+    <CrudPanel title="Incoming Messages" onAdd={() => alert("Messages are created via the contact form.")}>
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground italic">
+          No messages yet.
+        </div>
+      ) : (
+        items.map((m) => (
+          <div key={m.id || m._id} className="group relative rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/30">
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h3 className="font-display font-bold text-foreground">{m.subject}</h3>
+                <p className="text-xs text-muted-foreground">From: <span className="font-medium text-primary">{m.name}</span> ({m.email})</p>
+                <p className="text-[10px] text-muted-foreground/50 mt-1">{new Date(m.createdAt).toLocaleString()}</p>
+              </div>
+              <button
+                onClick={() => remove(m.id || m._id)}
+                className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+            <div className="rounded-lg bg-secondary/30 p-4 text-sm text-foreground whitespace-pre-wrap border border-border/50">
+              {m.message}
+            </div>
+          </div>
+        ))
+      )}
+    </CrudPanel>
+  );
+};
+
+// ─── Home Content ─────────────────────────────────────
+const HomePanel = () => {
+  const [content, setContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = async () => {
+    const res = await api.get("home-content");
+    if (res) setContent(res);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetch(); }, []);
+
+  const save = async () => {
+    await api.put("home-content", null, content);
+    alert("Home content updated successfully!");
+    fetch();
+  };
+
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+  if (!content) return <div className="p-8 text-center text-muted-foreground">Error loading content.</div>;
+
+  const updateHero = (field: string, value: string) => {
+    setContent({ ...content, hero: { ...content.hero, [field]: value } });
+  };
+
+  const updateAbout = (field: string, value: any) => {
+    setContent({ ...content, about: { ...content.about, [field]: value } });
+  };
+
+  return (
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-2 text-primary">
+          <Layout size={20} />
+          <h2 className="font-display text-xl font-bold">Hero Section</h2>
+        </div>
+        <div className="grid gap-6">
+          <Field label="Subtitle (Pill text)" value={content.hero.subtitle} onChange={(v) => updateHero('subtitle', v)} />
+          <Field label="Main Title" value={content.hero.title} onChange={(v) => updateHero('title', v)} />
+          <Field label="Description" value={content.hero.description} onChange={(v) => updateHero('description', v)} textarea />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Button Text" value={content.hero.primaryButtonText} onChange={(v) => updateHero('primaryButtonText', v)} />
+            <Field label="Button Link" value={content.hero.primaryButtonLink} onChange={(v) => updateHero('primaryButtonLink', v)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-2 text-primary">
+          <Layout size={20} />
+          <h2 className="font-display text-xl font-bold">About Section</h2>
+        </div>
+        <div className="grid gap-6">
+          <Field label="Subtitle" value={content.about.subtitle} onChange={(v) => updateAbout('subtitle', v)} />
+          <Field label="Main Title" value={content.about.title} onChange={(v) => updateAbout('title', v)} />
+          <Field label="Description Paragraph 1" value={content.about.description1} onChange={(v) => updateAbout('description1', v)} textarea />
+          <Field label="Description Paragraph 2" value={content.about.description2} onChange={(v) => updateAbout('description2', v)} textarea />
+          <div className="space-y-3">
+            <label className="text-xs font-medium text-muted-foreground">Key Competencies (Comma separated)</label>
+            <textarea
+              value={content.about.competencies.join(', ')}
+              onChange={(e) => updateAbout('competencies', e.target.value.split(',').map(s => s.trim()))}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="flex justify-end">
+        <button
+          onClick={save}
+          className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground transition-shadow hover:shadow-glow"
+        >
+          <Save size={18} /> Save All Changes
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -1181,29 +1354,51 @@ const Field = ({ label, value, onChange, textarea, placeholder }: { label: strin
   </div>
 );
 
-const SelectField = ({ label, value, onChange, options, displayOptions, showIcons }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-xs font-medium text-muted-foreground">{label}</label>
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-lg border border-border bg-secondary pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        {options.map((opt, i) => (
-          <option key={opt} value={opt}>{displayOptions ? displayOptions[i] : opt}</option>
-        ))}
-      </select>
-      {showIcons && value && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
-          {(() => {
-            const IconComponent = (Icons as any)[value];
-            return IconComponent ? <IconComponent size={18} /> : null;
-          })()}
+const SelectField = ({ label, value, onChange, options, displayOptions, showIcons, allowCustom }: { label: string; value: string; onChange: (v: string) => void; options: string[]; displayOptions?: string[]; showIcons?: boolean; allowCustom?: boolean }) => {
+  const isCustom = (showIcons || allowCustom) && value && !options.filter(opt => opt !== 'other').includes(value);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-medium text-muted-foreground">{label}</label>
+      <div className="relative">
+        <select
+          value={isCustom ? "other" : value}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === 'other') {
+              onChange(""); // Clear to let user type
+            } else {
+              onChange(val);
+            }
+          }}
+          className={`w-full appearance-none rounded-lg border border-border bg-secondary ${showIcons ? 'pl-10' : 'pl-4'} pr-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
+        >
+          {options.map((opt, i) => (
+            <option key={opt} value={opt}>{displayOptions ? displayOptions[i] : opt}</option>
+          ))}
+        </select>
+        {showIcons && value && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
+            {(() => {
+              const IconComponent = (Icons as any)[value];
+              return IconComponent ? <IconComponent size={18} /> : (isCustom ? <Icons.HelpCircle size={18} /> : null);
+            })()}
+          </div>
+        )}
+      </div>
+      {(showIcons || allowCustom) && (value === "other" || isCustom || (options.includes('other') && !options.filter(opt => opt !== 'other').includes(value))) && (
+        <div className="mt-1.5 flex flex-col gap-1">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{allowCustom ? `Type Custom ${label}` : "Type Lucide Icon Name"}</label>
+          <input
+            value={value === "other" ? "" : value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={allowCustom ? `e.g. My Custom ${label}` : "e.g. Anchor, Bell, Heart"}
+            className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/30"
+          />
         </div>
       )}
     </div>
-  </div>
-);
+  );
+};
 
 export default AdminDashboard;

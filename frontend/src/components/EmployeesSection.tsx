@@ -71,7 +71,7 @@ const EmployeesSection = () => {
                 <div className="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-primary/20 bg-secondary">
                   {e.photo_url ? (
                     <img
-                      src={e.photo_url}
+                      src={api.getAssetUrl(e.photo_url) || ""}
                       alt={e.name}
                       className="h-full w-full object-cover"
                     />

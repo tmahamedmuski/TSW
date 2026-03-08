@@ -48,8 +48,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl transition-all duration-300 ${isAdmin ? "top-10" : "top-0"
-        }`}
+      className="fixed left-0 right-0 top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl transition-all duration-300"
     >
       <div className="container mx-auto flex items-center justify-between py-4">
         <a href="/#home" className="flex items-center gap-3">
