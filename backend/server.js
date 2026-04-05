@@ -31,6 +31,7 @@ app.use('/api/custom-items', require('./routes/customItems'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/home-content', require('./routes/homeContent'));
+app.use('/api/upload', require('./routes/upload'));
 app.use('/', (req, res) => res.send('Welcome to the TSW API'));
 
 

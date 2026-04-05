@@ -26,7 +26,10 @@ exports.createService = async (req, res) => {
 // @route   PUT /api/services/:id
 exports.updateService = async (req, res) => {
     try {
-        const service = await Service.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const service = await Service.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

@@ -26,7 +26,10 @@ exports.createItem = async (req, res) => {
 // @route   PUT /api/custom-items/:id
 exports.updateItem = async (req, res) => {
     try {
-        const item = await CustomItem.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const item = await CustomItem.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

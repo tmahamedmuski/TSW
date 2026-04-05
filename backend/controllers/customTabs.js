@@ -43,7 +43,10 @@ exports.deleteTab = async (req, res) => {
 // @route   PUT /api/custom-tabs/:id
 exports.updateTab = async (req, res) => {
     try {
-        const tab = await CustomTab.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const tab = await CustomTab.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

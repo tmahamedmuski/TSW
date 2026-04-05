@@ -26,7 +26,10 @@ exports.createStat = async (req, res) => {
 // @route   PUT /api/stats/:id
 exports.updateStat = async (req, res) => {
     try {
-        const stat = await Stat.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const stat = await Stat.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

@@ -44,7 +44,11 @@ exports.createContact = async (req, res) => {
 // @access  Private (Admin)
 exports.updateContact = async (req, res) => {
     try {
-        const contact = await Contact.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+
+        const contact = await Contact.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

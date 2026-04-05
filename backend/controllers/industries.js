@@ -26,7 +26,10 @@ exports.createIndustry = async (req, res) => {
 // @route   PUT /api/industries/:id
 exports.updateIndustry = async (req, res) => {
     try {
-        const industry = await Industry.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const industry = await Industry.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

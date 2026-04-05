@@ -30,7 +30,10 @@ exports.createProject = async (req, res) => {
 // @route   PUT /api/projects/:id
 exports.updateProject = async (req, res) => {
     try {
-        const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const project = await Project.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

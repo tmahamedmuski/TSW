@@ -26,7 +26,10 @@ exports.createEmployee = async (req, res) => {
 // @route   PUT /api/employees/:id
 exports.updateEmployee = async (req, res) => {
     try {
-        const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        delete updateData._id;
+        delete updateData.id;
+        const employee = await Employee.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });
