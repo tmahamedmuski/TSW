@@ -13,8 +13,8 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
-    .get(protect, authorize('admin'), getContacts)
-    .post(createContact);
+    .get(getContacts)
+    .post(protect, authorize('admin'), createContact);
 
 router.route('/:id')
     .get(getContact)
