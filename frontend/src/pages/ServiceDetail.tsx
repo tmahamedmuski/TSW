@@ -146,16 +146,24 @@ const ServiceDetail = () => {
                                                 ))}
                                             </div>
                                         )}
-                                        {p.link && (
-                                            <a
-                                                href={p.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                                        <div className="mt-4 flex items-center justify-between">
+                                            <Link
+                                                to={`/project/${p.id || p._id}`}
+                                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 hover:underline"
                                             >
-                                                View Project <ExternalLink size={14} />
-                                            </a>
-                                        )}
+                                                View Details
+                                            </Link>
+                                            {p.link && (
+                                                <a
+                                                    href={p.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                                                >
+                                                    Live Link <ExternalLink size={14} />
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}

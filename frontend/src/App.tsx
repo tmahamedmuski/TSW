@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AdminAccess from "./pages/AdminAccess";
 import AdminDashboard from "./pages/AdminDashboard";
 import ServiceDetail from "./pages/ServiceDetail";
+import ProjectDetail from "./pages/ProjectDetail";
 import DynamicPage from "./pages/DynamicPage";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               }
             />
             <Route path="/service/:id" element={<ServiceDetail />} />
+            <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
